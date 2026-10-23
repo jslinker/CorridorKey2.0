@@ -28,7 +28,15 @@ def image_diff(left,right):
     a=cv2.imread(str(left),cv2.IMREAD_UNCHANGED)
     b=cv2.imread(str(right),cv2.IMREAD_UNCHANGED)
     if a is None or b is None: return {'exact':False,'error':'decode failed'}
-    return diff(a,b)
+    result=diff(a,b)
+    if result.get('same_shape'):
+        if a.ndim == 2:
+            result['components']={'alpha':diff(a,b)}
+        elif a.shape[-1] == 4:
+            result['components']={'color':diff(a[:,:,:3],b[:,:,:3]),'alpha':diff(a[:,:,3],b[:,:,3])}
+        else:
+            result['components']={'color':diff(a,b)}
+    return result
 
 def video_diff(left,right):
     def probe(path):

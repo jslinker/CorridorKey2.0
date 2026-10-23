@@ -40,10 +40,13 @@ Metal uses synchronous uploads for streamed CPU data and a CPU fallback for
 non-divisible area resizing. CUDA retains its original execution path.
 Automatic memory selection reserves additional headroom on shared Mac memory.
 
-**Validation status:** the first Mac smoke tests produce finite, repeatable
-pixels, but they are not pixel-identical to the unmodified CUDA reference.
-Cross-platform exact equality is not established. Full CLI and native-footage
-validation is in progress.
+**Validation status:** the Mac smoke tests produce finite, repeatable pixels.
+The CLI test matrix runs, but cross-platform parity is still incomplete: some
+longer sequences exceed the agreed numerical limits. OpenCV 4.11 on Apple
+Silicon also corrupts the last decoded row of the tested YUV444 video; OpenCV
+4.13 fixes the isolated decoder check and is undergoing inference validation.
+Full-resolution speed and memory tests are in progress. See
+[the validation tools](tests/validation/README.md) for coverage and limits.
 
 ### NVIDIA CUDA
 

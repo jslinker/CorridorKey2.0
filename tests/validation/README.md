@@ -59,3 +59,20 @@ invalid values, frame counts, and exact repeatability need separate checks.
 Auto memory settings can select different temporal windows on different GPUs.
 Use identical explicit Hann window, stride, and memory mode for controlled pixel
 comparisons. Default-auto runs test usability and performance on each system.
+
+## Agreed numerical limits
+
+For each raw EXR frame, compare alpha separately from color. Alpha must have
+maximum absolute error at most 0.02 and mean absolute error at most 0.0005.
+Color must have maximum absolute error at most 0.05 and mean absolute error at
+most 0.001. These are stored linear EXR units, not display-brightness percentages.
+The user accepted these limits on 2026-10-22. Matching dimensions, frame counts,
+finite values, and exact repeatability within each platform remain required.
+
+```sh
+python tests/validation/audit_comparisons.py --comparisons /path/to/comparisons \
+  --output /path/to/tolerance-audit.json
+```
+
+This audit reports encoded video separately. Its limits apply to raw EXR output.
+A passed exit status alone is not a parity result.
