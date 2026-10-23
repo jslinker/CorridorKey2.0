@@ -18,6 +18,35 @@ Any business or research inquiries for Zac can be directed to z.brooks.harris@gm
 
 ## Setup
 
+### Apple Silicon Mac
+
+This port selects Apple's Metal GPU when CUDA is unavailable. The command-line
+arguments are the same on both platforms. Use Python 3.12 and PyTorch 2.9.1:
+
+```sh
+python3.12 -m venv venv
+source venv/bin/activate
+pip install torch==2.9.1 torchvision==0.24.1
+pip install -r requirements.txt
+python scripts/download_weights.py
+python infer.py --input /path/to/clip.mp4 --output_dir /path/to/output
+```
+
+Install `ffmpeg` separately and make it available on `PATH`. The shell launcher
+also accepts a `.venv` environment. Use a current macOS version with Metal
+bfloat16 support; the tested system is an M3 Max.
+
+Metal uses synchronous uploads for streamed CPU data and a CPU fallback for
+non-divisible area resizing. CUDA retains its original execution path.
+Automatic memory selection reserves additional headroom on shared Mac memory.
+
+**Validation status:** the first Mac smoke tests produce finite, repeatable
+pixels, but they are not pixel-identical to the unmodified CUDA reference.
+Cross-platform exact equality is not established. Full CLI and native-footage
+validation is in progress.
+
+### NVIDIA CUDA
+
 You need an NVIDIA GPU (currently RTX 30-series or newer) with at least 4 GB of VRAM
 for footage up to 1440p, or 6 GB for 4K, `ffmpeg` on your PATH, and a Python
 environment with CUDA-enabled PyTorch installed. On smaller cards, see [Long Clips And Low VRAM](#long-clips-and-low-vram).
@@ -56,7 +85,7 @@ The easiest way to run CorridorKey is to drag a clip, a frame-sequence folder,
 or a folder of clips onto the launcher in the repository root:
 
 - **Windows:** `CorridorKey_DRAG_CLIPS_HERE.bat`
-- **Linux:** `CorridorKey_DRAG_CLIPS_HERE.sh` (or run it in a terminal and drop
+- **Linux / macOS:** `CorridorKey_DRAG_CLIPS_HERE.sh` (or run it in a terminal and drop
   the clip into the terminal when asked)
 
 It walks you through the inference mode, outputs, and GPU memory profile, then
