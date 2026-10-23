@@ -192,9 +192,22 @@ def apply_auto_vram(cfg: InferenceConfig, shape_hw, num_frames: int, device="cud
     budget_gb = memory_budget_gb(device)
     chunk, stride, low_vram, estimate = select_vram_profile(shape_hw, num_frames, budget_gb)
     cfg.hann_chunk, cfg.hann_stride, cfg.low_vram = chunk, stride, low_vram
+    if torch.device(device).type == "mps" and low_vram:
+        # CUDA-sized batches retain much larger attention intermediates on MPS.
+        # This applies only to automatic memory selection. Explicit Hann or
+        # low-VRAM mode retains the user's batch settings.
+        for name, limit in (
+            ("low_vram_full_attn_query_chunk_tokens", 512),
+            ("low_vram_swin_window_batch", 4),
+            ("low_vram_mlp_chunk_tokens", 16384),
+        ):
+            current = getattr(cfg, name)
+            if current > 0:
+                setattr(cfg, name, min(current, limit))
+    estimate_label = "CUDA reference peak" if torch.device(device).type == "mps" else "estimated peak"
     print(f"  Auto VRAM: {budget_gb:.1f} GB available at {shape_hw[1]}x{shape_hw[0]} -> "
           f"hann_chunk={chunk}, hann_stride={stride}, low_vram={low_vram} "
-          f"(estimated peak {estimate:.1f} GB)")
+          f"({estimate_label} {estimate:.1f} GB)")
     if estimate * _VRAM_MARGIN_SCALE + _VRAM_MARGIN_GB > budget_gb:
         print("  [WARNING] Even a single-frame window may not fit this GPU at this "
               "resolution. Inference may run out of memory.")

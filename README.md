@@ -39,6 +39,10 @@ bfloat16 support; the tested system is an M3 Max.
 Metal uses synchronous uploads for streamed CPU data and a CPU fallback for
 non-divisible area resizing. CUDA retains its original execution path.
 Automatic memory selection reserves additional headroom on shared Mac memory.
+In CLI auto mode, Metal uses smaller attention and MLP batches. It also sets
+PyTorch high/low memory watermarks to 0.5/0.4 before model loading, unless the
+user has set either watermark environment variable. Explicit Hann or low-VRAM
+settings retain their existing behavior. CUDA memory settings are unchanged.
 
 **Validation status:** the Mac smoke tests produce finite, repeatable pixels.
 The CLI test matrix runs, but cross-platform parity is still incomplete: some
@@ -48,6 +52,31 @@ decoded row of the tested YUV444 video. The newer version fixes the decoded
 input and passes the five affected inference cases within the agreed limits.
 Full-resolution speed and memory tests are in progress. See
 [the validation tools](tests/validation/README.md) for coverage and limits.
+
+An eight-frame 4K check with the new batch sizes completed in 285 seconds on
+the M3 Max and 114 seconds on the RTX 5080. The Mac process peak was 30.7 GB.
+Alpha passes the agreed limits. A few raw foreground color values in nearly
+transparent areas exceed the color limit; this remains an open acceptance
+item. Color after applying alpha stays within the limit. The full 302-frame
+Mac run is still in progress.
+
+For lower memory use on the tested 64 GB M3 Max, this existing CLI setting
+completed all 24 supplied 4K PNG frames:
+
+```sh
+PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.5 PYTORCH_MPS_LOW_WATERMARK_RATIO=0.4 \
+python infer.py --input '/path/to/Video Frames (24)' --num_frames -1 \
+  --hann_chunk 4 --hann_stride 2 --low_vram \
+  --low_vram_full_attn_query_chunk_tokens 512 \
+  --outputs alpha fg checker cutout --output_dir /path/to/output
+```
+
+This took 994 seconds, compared with 959 seconds for the same command using
+the original 2,048-token chunk and normal MPS memory limits. Every decoded
+output pixel matched. The sampled process memory peak fell from 47.9 GB to
+27.4 GB at the time of measurement; the latter is not a complete-run peak.
+The smaller chunks trade some speed for lower memory use. Do not disable
+the MPS allocation limit to avoid an out-of-memory error.
 
 ### NVIDIA CUDA
 
