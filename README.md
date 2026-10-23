@@ -42,9 +42,10 @@ Automatic memory selection reserves additional headroom on shared Mac memory.
 
 **Validation status:** the Mac smoke tests produce finite, repeatable pixels.
 The CLI test matrix runs, but cross-platform parity is still incomplete: some
-longer sequences exceed the agreed numerical limits. OpenCV 4.11 on Apple
-Silicon also corrupts the last decoded row of the tested YUV444 video; OpenCV
-4.13 fixes the isolated decoder check and is undergoing inference validation.
+longer sequences exceed the agreed numerical limits. Mac requirements select
+OpenCV 4.13.0.92 and NumPy 2. OpenCV 4.11 on Apple Silicon corrupts the last
+decoded row of the tested YUV444 video. The newer version fixes the decoded
+input and passes the five affected inference cases within the agreed limits.
 Full-resolution speed and memory tests are in progress. See
 [the validation tools](tests/validation/README.md) for coverage and limits.
 

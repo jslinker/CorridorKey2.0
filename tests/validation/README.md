@@ -1,7 +1,7 @@
 # Cross-platform validation
 
 These tools preserve commands, exit codes, elapsed wall time, logs, output hashes,
-and exact decoded-pixel comparisons. They do not declare a numerical tolerance.
+and exact decoded-pixel comparisons. The audit applies the limits listed below.
 The same source and model asset hashes must be used for a controlled comparison.
 
 The 82-case matrix covers all nonempty output selections, hint mode combinations,
@@ -76,3 +76,28 @@ python tests/validation/audit_comparisons.py --comparisons /path/to/comparisons 
 
 This audit reports encoded video separately. Its limits apply to raw EXR output.
 A passed exit status alone is not a parity result.
+
+### Accepted exception for the supplied 24-frame fixture
+
+The user accepted one exception for `all-frames` and its equivalent
+`zero-means-all-frames` command on 2026-10-22. On this supplied PNG fixture,
+alpha maximum absolute error reaches 0.1640625. At most 23 of 82,944 pixels
+per frame exceed 0.02; 120 of 1,990,656 pixels exceed it across the sequence.
+The largest errors are near the left image edge. Alpha mean error and all
+color limits pass. Higher-precision experiments did not remove the difference.
+
+This is a documented exception for this measured result. It does not change
+the general limits or accept future regressions. The numerical audit continues
+to report these exceedances so they remain visible.
+
+## Check output structure and preserved hashes
+
+```sh
+python tests/validation/verify_run_set.py --runs /path/to/runs \
+  --output /path/to/inventory-audit.json
+```
+
+This check is specific to the supplied matrix and its 384 × 216 fixtures and
+3840 × 2160 original media. It checks recorded file hashes, expected exit codes,
+output selections, frame counts, dimensions, and finite EXR values. It reports
+missing cases as pending. Windows paths in saved records are supported on Mac.
