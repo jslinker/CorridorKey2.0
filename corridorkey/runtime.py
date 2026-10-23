@@ -581,6 +581,10 @@ def hann_stage1_stream(model, source, meta, *, reader_cls, reader_kind: str,
             del rgb_c, hint_c, hint_quality_c, hint_cpu, hint_quality_cpu
             del model_chunk, display_chunk, review_chunk
             flush_before(next_start)
+            if device.type == "mps":
+                # Release unused Metal buffers before the next overlapping
+                # window. Keep live tensors and the window calculation intact.
+                empty_cache(device)
             print(f"      window {i + 1}/{len(starts)} [{t0}:{t1}]", flush=True)
         synchronize(device)
         flush_before(T_all + 1)

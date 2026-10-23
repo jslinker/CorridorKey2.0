@@ -53,7 +53,9 @@ for case in json.loads(a.suite.read_text()):
             digest = hashlib.file_digest(stream, 'sha256').hexdigest()
         if digest != output['sha256']:
             row['errors'].append('Changed output hash: ' + output['path'])
-    if case['expected_returncode'] != 0:
+    # A failed process can leave an empty video container. Report its exit and
+    # saved hashes without treating that incomplete file as a finished video.
+    if case['expected_returncode'] != 0 or record['returncode'] != 0:
         continue
     opts = options(case['args'])
     requested = int(opts.get('--num_frames', ['-1'])[0])

@@ -58,7 +58,19 @@ the M3 Max and 114 seconds on the RTX 5080. The Mac process peak was 30.7 GB.
 Alpha passes the agreed limits. A few raw foreground color values in nearly
 transparent areas exceed the color limit; this remains an open acceptance
 item. Color after applying alpha stays within the limit. The full 302-frame
-Mac run is still in progress.
+Mac test stopped at the 25.92 GiB GPU allocation limit after two windows.
+It did not reach the disk stop limit. With unused Metal cache released after
+each window, a separate 16-frame 4K video test completed all three windows in
+580.62 seconds. Its process peak was 34.05 GB. This short test has not yet been
+compared with Windows or repeated. The full video has not been rerun with the
+change, so full-video validation remains incomplete.
+
+Work stopped at the user's request. This branch preserves the current port
+and test tools. Remaining work includes full-video memory stability, output
+comparisons and repeat checks for the cache-release change, the open raw-color
+acceptance item, and the final performance report. The finite 82-case matrix
+covers every inference option with representative settings; it does not prove
+every possible numeric parameter combination.
 
 For lower memory use on the tested 64 GB M3 Max, this existing CLI setting
 completed all 24 supplied 4K PNG frames:
