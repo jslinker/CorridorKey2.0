@@ -1,5 +1,16 @@
 # CorridorKey 2.0
 
+## Full macOS support on Apple Silicon
+
+**Run CorridorKey 2.0 on your Mac with Metal GPU acceleration.**
+This fork preserves the existing command-line tools and original model weights,
+with memory controls for native 4K processing and optional native MPSGraph
+attention. A complete native 4K clip has been validated on a 24 GB M2 Mac.
+
+**[Get started on macOS →](#apple-silicon-mac)**
+
+---
+
 Welcome to CorridorKey 2.0! You may rest easy, weary artist. The green beast has been slain. The CorridorKey 2.0 model was designed and trained by Zachary Harris, in direct collaboration with Niko and Corridor Digital.
 
 # Check out our official plugin!
